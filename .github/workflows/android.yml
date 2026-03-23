@@ -39,7 +39,7 @@ jobs:
 
     - name: Build Release
       # Fixed seed → stable package name across builds (allows direct updates without reinstall)
-      run: ./gradlew assembleUniversalRelease -PPACKAGE_NAME_SEED=1337
+      run: ./gradlew assembleRelease -PPACKAGE_NAME_SEED=1337
 
     - name: Upload a Release Artifact
       uses: actions/upload-artifact@v4
