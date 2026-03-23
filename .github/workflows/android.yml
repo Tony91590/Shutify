@@ -28,24 +28,22 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Release
-      # Fixed seed → stable package name across builds (allows direct updates without reinstall)
-      run: ./gradlew assembleUniversalRelease -PPACKAGE_NAME_SEED=1337
+      run: ./gradlew assembleUniversalRelease -PPACKAGE_NAME_SEED=1337 -POBFUSCATION_KEY=${{ secrets.OBFUSCATION_KEY }}
 
     - name: Upload a Release Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: shutify-ci-release-apk
+        name: shushify-ci-release-apk
         path: |
           app/build/outputs/apk/universal/release
-          app/build/outputs/mapping/universalRelease/mapping.txt
 
     - name: Create AutoBuild Release
       run: |
         GIT_DESCRIBE=$(git rev-parse --short HEAD)
         VERSION=$(grep 'versionName = ' app/build.gradle.kts | sed 's/.*versionName = "\(.*\)".*/\1/')
         cd app/build/outputs/apk/universal/release/
-        mv app-universal-release.apk Shutify-v${VERSION}.apk
+        mv app-universal-release.apk Shushify-v${VERSION}.apk
         gh release delete autobuild --yes || true
-        gh release create autobuild Shutify-v${VERSION}.apk --latest --title "Shutify v${VERSION} (${GIT_DESCRIBE})" --notes "This is an auto build by Github Android CI"
+        gh release create autobuild Shushify-v${VERSION}.apk --latest --title "Shushify v${VERSION} (${GIT_DESCRIBE})" --notes "This is an auto build by Github Android CI"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
