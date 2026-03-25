@@ -73,8 +73,9 @@ jobs:
           gh release create autobuild "${APK_NAME}" \
             --prerelease \
             --title "Nightly build ${GIT_COMMIT_DATE}" \
-            --notes "Automated nightly build from commit \`${GIT_DESCRIBE}\`.
+            --notes |
+              Automated nightly build from commit `${GIT_DESCRIBE}`.
 
-> The package name and signature of this build change daily. You do **not** need to reinstall every day."
+              > The package name and signature of this build change daily. You do **not** need to reinstall every day.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
