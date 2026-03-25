@@ -18,6 +18,8 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Force Node.js 24 pour les actions
 
     steps:
       # 1️⃣ Checkout
@@ -43,9 +45,12 @@ jobs:
         id: seed
         run: echo "NUMBER=$(shuf -i 1-10000 -n 1)" >> $GITHUB_OUTPUT
 
-      # 5️⃣ Build release APK with proper Gradle syntax
+      # 5️⃣ Build release APK with full debug
       - name: Build release APK
-        run: ./gradlew :app:assembleRelease -PPACKAGE_NAME_SEED=${{ steps.seed.outputs.NUMBER }} --stacktrace --info --warning-mode all
+        run: |
+          ./gradlew :app:assembleRelease \
+            -PPACKAGE_NAME_SEED=${{ steps.seed.outputs.NUMBER }} \
+            --stacktrace --info --debug --warning-mode all
 
       # 6️⃣ Upload APK artifact
       - name: Upload APK artifact
@@ -57,7 +62,7 @@ jobs:
             app/build/outputs/apk/release/*.apk
             app/build/outputs/mapping/release/mapping.txt
 
-      # 7️⃣ Publish autobuild release for pushes to main
+      # 7️⃣ Publish autobuild release (for pushes only)
       - name: Publish autobuild release
         if: >
           github.event_name != 'pull_request' &&
