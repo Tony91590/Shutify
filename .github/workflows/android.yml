@@ -1,10 +1,14 @@
 name: Android CI
 
 on:
-push:
-branches: [ "GOGO" ]
-pull_request:
-branches: [ "GOGO" ]
+  push:
+    branches: [ "GOGO" ]
+    tags-ignore:
+      - 'v*'          # tagged releases are handled by release.yml
+  pull_request:
+    branches: [ "GOGO" ]
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
 build:
