@@ -1,4 +1,4 @@
-name: Android CI Full
+name: Shutify Android CI
 
 on:
   push:
@@ -28,23 +28,23 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Release APKs
+      - name: Build all possible APKs
         run: |
-          # Build main release and universal if exists
-          ./gradlew assembleRelease || true
-          ./gradlew assembleUniversalRelease || true
+          # Tente toutes les tâches de build possibles pour produire des APKs
+          ./gradlew :app:assembleRelease || true
+          ./gradlew :app:assembleDebug || true
+          ./gradlew :app:assembleUniversalRelease || true
 
-      - name: List APKs for debug
+      - name: List APK outputs for debug
         run: ls -R app/build/outputs/apk || echo "No APKs found yet"
 
       - name: Find all APKs and Mapping files
         id: find_outputs
         run: |
-          # Detect all APKs and mapping.txt
           APKS=$(find app/build/outputs/apk -type f -name "*.apk")
           MAPPINGS=$(find app/build/outputs/mapping -type f -name "*.txt")
           if [ -z "$APKS" ]; then
-            echo "No APKs found!"
+            echo "No APKs found! Build probably failed."
             exit 1
           fi
           echo "APKS=$APKS" >> $GITHUB_ENV
@@ -57,7 +57,7 @@ jobs:
       - name: Upload All Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: shushify-ci-release
+          name: shutify-ci-release
           path: |
             ${{ env.APKS }}
             ${{ env.MAPPINGS }}
@@ -65,21 +65,21 @@ jobs:
       - name: Create GitHub Release with all APKs
         run: |
           GIT_DESCRIBE=$(git rev-parse --short HEAD)
-          VERSION=$(grep 'versionName = ' app/build.gradle | sed 's/.*versionName = "\(.*\)".*/\1/')
+          # On essaie de récupérer versionName, fallback à "unknown"
+          VERSION=$(grep 'versionName = ' app/build.gradle || echo "versionName = \"unknown\"" | sed 's/.*versionName = "\(.*\)".*/\1/')
           
-          # Renommer et collecter les APKs pour la release
           RELEASE_APKS=""
           for apk in $APKS; do
             BASENAME=$(basename "$apk")
-            NEWNAME="Shushify-${BASENAME%.apk}-v${VERSION}-${GIT_DESCRIBE}.apk"
+            NEWNAME="Shutify-${BASENAME%.apk}-v${VERSION}-${GIT_DESCRIBE}.apk"
             mv "$apk" "$NEWNAME"
             RELEASE_APKS="$RELEASE_APKS $NEWNAME"
           done
 
           # Supprimer l’ancienne release si elle existe
           gh release delete autobuild --yes || true
-          
+
           # Créer une nouvelle release avec tous les APKs
-          gh release create autobuild $RELEASE_APKS --latest --title "Shushify v${VERSION} (${GIT_DESCRIBE})" --notes "Auto build by GitHub Actions"
+          gh release create autobuild $RELEASE_APKS --latest --title "Shutify v${VERSION} (${GIT_DESCRIBE})" --notes "Auto build by GitHub Actions"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
