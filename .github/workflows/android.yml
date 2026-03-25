@@ -50,4 +50,4 @@ steps:
     gh release create autobuild Shushify-v${VERSION}.apk --latest --title "Shushify v${VERSION} (${GIT_DESCRIBE})" --notes "This is an auto build by Github Android CI"
   env:
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
+
