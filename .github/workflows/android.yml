@@ -20,11 +20,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout
       - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0        # needed for git log date in versionName
 
+      # 2️⃣ Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -32,16 +34,22 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      # 3️⃣ Make gradlew executable
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # 4️⃣ Generate package-name seed
       - name: Generate package-name seed
         id: seed
         run: echo "NUMBER=$(shuf -i 1-10000 -n 1)" >> $GITHUB_OUTPUT
 
+      # 5️⃣ Build release APK with detailed Kotlin errors
       - name: Build release APK
-        run: ./gradlew :app:assembleUniversalRelease -PPACKAGE_NAME_SEED=${{ steps.seed.outputs.NUMBER }}
+        run: ./gradlew :app:assembleUniversalRelease \
+          -PPACKAGE_NAME_SEED=${{ steps.seed.outputs.NUMBER }} \
+          --stacktrace --info --warning-mode all
 
+      # 6️⃣ Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -51,7 +59,7 @@ jobs:
             app/build/outputs/apk/universal/release/*.apk
             app/build/outputs/mapping/universalRelease/mapping.txt
 
-      # Only publish an autobuild release for pushes to main (not PRs, not forks)
+      # 7️⃣ Only publish an autobuild release for pushes to main (not PRs, not forks)
       - name: Publish autobuild release
         if: >
           github.event_name != 'pull_request' &&
@@ -67,6 +75,6 @@ jobs:
             --title "Nightly build ${GIT_COMMIT_DATE}" \
             --notes "Automated nightly build from commit \`${GIT_DESCRIBE}\`.
 
-          > The package name and signature of this build change daily. You do **not** need to reinstall every day."
+> The package name and signature of this build change daily. You do **not** need to reinstall every day."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
