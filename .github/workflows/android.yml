@@ -37,7 +37,7 @@ jobs:
       - name: Create AutoBuild Release
         run: |
           GIT_DESCRIBE=$(git rev-parse --short HEAD)
-          VERSION=$(grep 'versionName = ' app/build.gradle.kts | sed 's/.*versionName = "\(.*\)".*/\1/')
+          VERSION=$(grep 'versionName = ' app/build.gradle | sed 's/.*versionName = "\(.*\)".*/\1/')
           cd app/build/outputs/apk/release/
           mv app-release.apk Shushify-v${VERSION}.apk
           gh release delete autobuild --yes || true
