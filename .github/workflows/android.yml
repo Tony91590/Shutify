@@ -2,11 +2,9 @@ name: Android CI
 
 on:
 push:
-branches:
-- GOGO
+branches: [ "GOGO" ]
 pull_request:
-branches:
-- GOGO
+branches: [ "GOGO" ]
 
 jobs:
 build:
