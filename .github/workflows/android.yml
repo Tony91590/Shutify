@@ -2,41 +2,30 @@ name: Android CI
 
 on:
   push:
-    branches: [ "GOGO" ]
-    tags-ignore:
-      - 'v*'          # tagged releases are handled by release.yml
+    branches:
+      - GOGO
   pull_request:
-    branches: [ "GOGO" ]
-  schedule:
-    - cron: '0 0 * * *'
+    branches:
+      - GOGO
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
-permissions:
-  contents: write
+    steps:
+      - uses: actions/checkout@v4
 
-steps:
-  - name: Checkout
-    uses: actions/checkout@v4
-    with:
-      submodules: true
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-  - name: Set up JDK
-    uses: actions/setup-java@v4
-    with:
-      java-version: '17'
-      distribution: 'temurin'
-      cache: gradle
-
-  - name: Grant execute permission for gradlew
-    run: chmod +x gradlew
-
-  - name: Build Release
-    run: ./gradlew assembleRelease
-
-  - name: Upload Release Artifact
+      - run: chmod +x gradlew 
+      run: ./gradlew assembleRelease
+       
+ - name: Upload Release Artifact
     uses: actions/upload-artifact@v4
     with:
       name: shushify-ci-release-apk
