@@ -33,6 +33,6 @@ android {
     minSdk = 27
 }
 
-rootProject.name = "Shutify"
+rootProject.name = "RVX Spotify"
 include(":app")
 include(":stub")
